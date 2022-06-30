@@ -10,7 +10,7 @@ class BookApiTestCase(APITestCase):
     def setUp(self):
         self.book1 = Book.objects.create(name='Test Book 1', price=100, author_name='Author 1')
         self.book2 = Book.objects.create(name='Test Book 2', price=200, author_name='Author 2')
-        self.book3 = Book.objects.create(name='Test Book 3', price=100, author_name='Author 3')
+        self.book3 = Book.objects.create(name='Test Book 3 Author 1', price=100, author_name='Author 3')
         self.url = reverse('api_v1:book-list')
 
     def test_get_list_of_books(self):
@@ -21,6 +21,12 @@ class BookApiTestCase(APITestCase):
 
     def test_get_list_of_filtered_books(self):
         response = self.client.get(self.url, data={'price': 100})
+        serializer_data = BookSerializer([self.book1, self.book3], many=True).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(serializer_data, response.data)
+
+    def test_get_list_of_searched_books(self):
+        response = self.client.get(self.url, data={'search': 'Author 1'})
         serializer_data = BookSerializer([self.book1, self.book3], many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
