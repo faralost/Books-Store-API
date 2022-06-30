@@ -78,3 +78,10 @@ class BookApiTestCase(APITestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.book1.refresh_from_db()
         self.assertEqual(666, self.book1.price)
+
+    def test_delete_book(self):
+        self.assertEqual(3, Book.objects.all().count())
+        self.client.force_login(self.user)
+        response = self.client.delete(self.url_detail)
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+        self.assertEqual(2, Book.objects.all().count())
