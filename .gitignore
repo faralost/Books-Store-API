@@ -13,3 +13,4 @@ settings_local.py
 .python-version
 .env.prod
 media
+.coverage
