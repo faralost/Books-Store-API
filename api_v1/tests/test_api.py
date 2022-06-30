@@ -50,6 +50,12 @@ class BookApiTestCase(APITestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
 
+    def test_get_book(self):
+        response = self.client.get(self.url_detail)
+        serializer_data = BookSerializer(self.book1).data
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(serializer_data, response.data)
+
     def test_create_book(self):
         self.assertEqual(3, Book.objects.all().count())
         data = {
