@@ -1,3 +1,6 @@
+import json
+
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -5,9 +8,12 @@ from rest_framework.test import APITestCase
 from api_v1.serializers import BookSerializer
 from store.models import Book
 
+User = get_user_model()
+
 
 class BookApiTestCase(APITestCase):
     def setUp(self):
+        self.user = User.objects.create(username='testuser')
         self.book1 = Book.objects.create(name='Test Book 1', price=100, author_name='Author 1')
         self.book2 = Book.objects.create(name='Test Book 2', price=200, author_name='Author 2')
         self.book3 = Book.objects.create(name='Test Book 3 Author 1', price=100, author_name='Author 3')
@@ -42,3 +48,19 @@ class BookApiTestCase(APITestCase):
         serializer_data = BookSerializer([self.book1, self.book3, self.book2], many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
+
+    def test_create_book(self):
+        self.assertEqual(3, Book.objects.all().count())
+        data = {
+            'name': 'New Book of Pyhon 3',
+            'price': 666,
+            'author_name': 'Irina Lesnikova'
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, data=json_data, content_type='application/json')
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(4, Book.objects.all().count())
+        new_book = Book.objects.get(id=4)
+        self.assertEqual('New Book of Pyhon 3', new_book.name)
+        self.assertEqual(666, new_book.price)
