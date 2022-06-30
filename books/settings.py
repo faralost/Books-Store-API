@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
     # custom
     'store',
+    'api_v1',
 ]
 
 MIDDLEWARE = [
