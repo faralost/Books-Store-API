@@ -16,11 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from api_v1.views import oauth
+
 api_urlpatterns = [
     path('v1/', include('api_v1.urls')),
 ]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(api_urlpatterns))
+    path('api/', include(api_urlpatterns)),
+    path('', include('social_django.urls', namespace='social')),
+    path('auth/', oauth)
 ]

@@ -4,3 +4,4 @@ python-dotenv==0.20.0
 djangorestframework==3.13.1
 coverage==6.4.1
 django-filter==22.1
+social-auth-app-django==5.0.0
