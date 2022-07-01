@@ -71,6 +71,7 @@ class BookApiTestCase(APITestCase):
         new_book = Book.objects.get(id=4)
         self.assertEqual('New Book of Pyhon 3', new_book.name)
         self.assertEqual(666, new_book.price)
+        self.assertEqual(self.user, new_book.owner)
 
     def test_update_book(self):
         data = {
@@ -91,3 +92,4 @@ class BookApiTestCase(APITestCase):
         response = self.client.delete(self.url_detail)
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
         self.assertEqual(2, Book.objects.all().count())
+

@@ -17,6 +17,10 @@ class BookViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'author_name']
     ordering_fields = ['price', 'author_name']
 
+    def perform_create(self, serializer):
+        serializer.validated_data['owner'] = self.request.user
+        serializer.save()
+
 
 def oauth(request):
     return render(request, 'api/oauth.html')
