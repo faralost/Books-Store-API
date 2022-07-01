@@ -3,6 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 
 from api_v1.serializers import BookSerializer
@@ -14,7 +15,7 @@ User = get_user_model()
 class BookApiTestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create(username='testuser')
-        self.book1 = Book.objects.create(name='Test Book 1', price=100, author_name='Author 1')
+        self.book1 = Book.objects.create(name='Test Book 1', price=100, author_name='Author 1', owner=self.user)
         self.book2 = Book.objects.create(name='Test Book 2', price=200, author_name='Author 2')
         self.book3 = Book.objects.create(name='Test Book 3 Author 1', price=100, author_name='Author 3')
         self.url_list = reverse('api_v1:book-list')
@@ -86,6 +87,22 @@ class BookApiTestCase(APITestCase):
         self.book1.refresh_from_db()
         self.assertEqual(666, self.book1.price)
 
+    def test_update_book_by_not_owner(self):
+        self.user2 = User.objects.create(username='testuser2')
+        data = {
+            'name': self.book1.name,
+            'price': 666,
+            'author_name': self.book1.author_name
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user2)
+        response = self.client.put(self.url_detail, data=json_data, content_type='application/json')
+        self.assertEqual({'detail': ErrorDetail(string='You do not have permission to perform this action.',
+                                                code='permission_denied')}, response.data)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.book1.refresh_from_db()
+        self.assertEqual(100, self.book1.price)
+
     def test_delete_book(self):
         self.assertEqual(3, Book.objects.all().count())
         self.client.force_login(self.user)
@@ -93,3 +110,10 @@ class BookApiTestCase(APITestCase):
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
         self.assertEqual(2, Book.objects.all().count())
 
+    def test_delete_book_by_not_owner(self):
+        self.user2 = User.objects.create(username='testuser2')
+        self.assertEqual(3, Book.objects.all().count())
+        self.client.force_login(self.user2)
+        response = self.client.delete(self.url_detail)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual(3, Book.objects.all().count())
