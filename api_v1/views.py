@@ -1,4 +1,4 @@
-from django.db.models import Count, Case, When
+from django.db.models import Count, Case, When, Avg
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
@@ -14,7 +14,8 @@ from store.models import Book, UserBookRelation
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.annotate(
-            likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1)))
+            likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
+            rating=Avg('userbookrelation__rate')
         ).order_by('pk')
     serializer_class = BookSerializer
     permission_classes = [IsOwnerOrStaffOrReadOnly]
