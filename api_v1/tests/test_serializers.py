@@ -1,26 +1,46 @@
+from django.db.models import Count, Case, When
 from django.test import TestCase
 
 from api_v1.serializers import BookSerializer
-from store.models import Book
+from store.models import Book, User, UserBookRelation
 
 
 class BookSerializerTestCase(TestCase):
     def test_serializer_is_ok(self):
+        user1 = User.objects.create(username='user1')
+        user2 = User.objects.create(username='user2')
+        user3 = User.objects.create(username='user3')
+
         book1 = Book.objects.create(name='Test Book 1', price=100, author_name='Author 1')
         book2 = Book.objects.create(name='Test Book 2', price=200, author_name='Author 2')
-        data = BookSerializer([book1, book2], many=True).data
+
+        UserBookRelation.objects.create(user=user1, book=book1, is_liked=True)
+        UserBookRelation.objects.create(user=user2, book=book1, is_liked=True)
+        UserBookRelation.objects.create(user=user3, book=book1, is_liked=True)
+
+        UserBookRelation.objects.create(user=user1, book=book2, is_liked=True)
+        UserBookRelation.objects.create(user=user2, book=book2, is_liked=True)
+        UserBookRelation.objects.create(user=user3, book=book2, is_liked=False)
+
+        books = Book.objects.annotate(
+            likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1)))
+        ).order_by('pk')
+
+        data = BookSerializer(books, many=True).data
         expected_data = [
             {
                 'id': book1.id,
                 'name': 'Test Book 1',
                 'price': '100.00',
-                'author_name': 'Author 1'
+                'author_name': 'Author 1',
+                'likes_count': 3
             },
             {
                 'id': book2.id,
                 'name': 'Test Book 2',
                 'price': '200.00',
-                'author_name': 'Author 2'
+                'author_name': 'Author 2',
+                'likes_count': 2
             },
         ]
         self.assertEqual(expected_data, data)

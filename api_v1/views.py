@@ -1,3 +1,4 @@
+from django.db.models import Count, Case, When
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
@@ -12,7 +13,9 @@ from store.models import Book, UserBookRelation
 
 
 class BookViewSet(viewsets.ModelViewSet):
-    queryset = Book.objects.all()
+    queryset = Book.objects.annotate(
+            likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1)))
+        ).order_by('pk')
     serializer_class = BookSerializer
     permission_classes = [IsOwnerOrStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
