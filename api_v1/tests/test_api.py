@@ -171,3 +171,25 @@ class UserBookRelationApiTestCase(APITestCase):
         relation.refresh_from_db()
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertFalse(relation.is_liked)
+
+    def test_rate(self):
+        data = {
+            'rate': 4,
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+        response = self.client.patch(self.url, data=json_data, content_type='application/json')
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        relation = UserBookRelation.objects.get(user=self.user, book=self.book1)
+        self.assertEqual(4, relation.rate)
+
+    def test_rate_wrong(self):
+        data = {
+            'rate': 7,
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+        response = self.client.patch(self.url, data=json_data, content_type='application/json')
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.data)
+        relation = UserBookRelation.objects.get(user=self.user, book=self.book1)
+        self.assertEqual(None, relation.rate)
