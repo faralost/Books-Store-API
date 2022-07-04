@@ -7,7 +7,7 @@ from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APITestCase
 
 from api_v1.serializers import BookSerializer
-from store.models import Book
+from store.models import Book, UserBookRelation
 
 User = get_user_model()
 
@@ -139,3 +139,35 @@ class BookApiTestCase(APITestCase):
         response = self.client.delete(self.url_detail)
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
         self.assertEqual(2, Book.objects.all().count())
+
+
+class UserBookRelationApiTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='testuser')
+        self.user2 = User.objects.create(username='testuser2')
+        self.book1 = Book.objects.create(name='Test Book 1', price=100, author_name='Author 1', owner=self.user)
+        self.book2 = Book.objects.create(name='Test Book 2', price=200, author_name='Author 2')
+        self.url = reverse('api_v1:userbookrelation-detail', args=(self.book1.id,))
+
+    def test_like(self):
+        data = {
+            'is_liked': True,
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+        response = self.client.patch(self.url, data=json_data, content_type='application/json')
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        relation = UserBookRelation.objects.get(user=self.user, book=self.book1)
+        self.assertTrue(relation.is_liked)
+
+    def test_unlike(self):
+        relation = UserBookRelation.objects.create(user=self.user, book=self.book1, is_liked=True)
+        data = {
+            'is_liked': False,
+        }
+        json_data = json.dumps(data)
+        self.client.force_login(self.user)
+        response = self.client.patch(self.url, data=json_data, content_type='application/json')
+        relation.refresh_from_db()
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertFalse(relation.is_liked)

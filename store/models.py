@@ -34,7 +34,7 @@ class UserBookRelation(models.Model):
     book = models.ForeignKey('store.Book', on_delete=models.CASCADE)
     is_liked = models.BooleanField(default=False)
     is_bookmarked = models.BooleanField(default=False)
-    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES)
+    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
 
     def __str__(self):
         return f'{self.user} | {self.book} | {self.rate}'
