@@ -15,7 +15,6 @@ from store.models import Book, UserBookRelation, User
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.annotate(
         likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-        rating=Avg('userbookrelation__rate'),
         discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
         owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
     ).prefetch_related(

@@ -1,8 +1,7 @@
 import json
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField
-from django.shortcuts import get_object_or_404
+from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField, Subquery, OuterRef
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
@@ -28,8 +27,8 @@ class BookApiTestCase(APITestCase):
         response = self.client.get(self.url_list)
         books = Book.objects.annotate(
             likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
+            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+            owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
         ).order_by('pk')
         serializer_data = BookSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -41,8 +40,8 @@ class BookApiTestCase(APITestCase):
         response = self.client.get(self.url_list, data={'price': 100})
         books = Book.objects.filter(id__in=[self.book1.id, self.book3.id]).annotate(
             likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
+            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+            owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
         ).order_by('pk')
         serializer_data = BookSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -52,8 +51,8 @@ class BookApiTestCase(APITestCase):
         response = self.client.get(self.url_list, data={'search': 'Author 1'})
         books = Book.objects.filter(id__in=[self.book1.id, self.book3.id]).annotate(
             likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
+            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+            owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
         ).order_by('pk')
         serializer_data = BookSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -63,8 +62,8 @@ class BookApiTestCase(APITestCase):
         response = self.client.get(self.url_list, data={'ordering': '-author_name'})
         books = Book.objects.filter(id__in=[self.book1.id, self.book2.id, self.book3.id]).annotate(
             likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
+            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+            owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
         ).order_by('-author_name', 'id')
         serializer_data = BookSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -74,8 +73,8 @@ class BookApiTestCase(APITestCase):
         response = self.client.get(self.url_list, data={'ordering': 'price'})
         books = Book.objects.filter(id__in=[self.book1.id, self.book2.id, self.book3.id]).annotate(
             likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
+            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+            owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
         ).order_by('price', 'id')
         serializer_data = BookSerializer(books, many=True).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -85,8 +84,8 @@ class BookApiTestCase(APITestCase):
         response = self.client.get(self.url_detail)
         book = Book.objects.annotate(
             likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
+            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+            owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
         ).get(id=self.book1.id)
         serializer_data = BookSerializer(book).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)

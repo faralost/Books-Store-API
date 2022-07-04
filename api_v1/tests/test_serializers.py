@@ -1,4 +1,4 @@
-from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField
+from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField, Subquery, OuterRef
 from django.test import TestCase
 
 from api_v1.serializers import BookSerializer
@@ -16,7 +16,9 @@ class BookSerializerTestCase(TestCase):
 
         UserBookRelation.objects.create(user=user1, book=book1, is_liked=True, rate=5)
         UserBookRelation.objects.create(user=user2, book=book1, is_liked=True, rate=5)
-        UserBookRelation.objects.create(user=user3, book=book1, is_liked=True, rate=4)
+        user_book = UserBookRelation.objects.create(user=user3, book=book1, is_liked=True)
+        user_book.rate = 4
+        user_book.save()
 
         UserBookRelation.objects.create(user=user1, book=book2, is_liked=True, rate=3)
         UserBookRelation.objects.create(user=user2, book=book2, is_liked=True, rate=4)
@@ -24,8 +26,8 @@ class BookSerializerTestCase(TestCase):
 
         books = Book.objects.annotate(
             likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
+            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+            owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
         ).order_by('pk')
 
         data = BookSerializer(books, many=True).data
@@ -38,7 +40,7 @@ class BookSerializerTestCase(TestCase):
                 'likes_count': 3,
                 'rating': '4.67',
                 'discounted_price': '50.00',
-                'owner': '',
+                'owner_name': None,
                 'readers': [
                     {
                         'id': user1.id,
@@ -66,7 +68,7 @@ class BookSerializerTestCase(TestCase):
                 'likes_count': 2,
                 'rating': '3.50',
                 'discounted_price': '200.00',
-                'owner': 'user1',
+                'owner_name': 'user1',
                 'readers': [
                     {
                         'id': user1.id,
