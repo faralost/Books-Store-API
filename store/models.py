@@ -10,6 +10,7 @@ class Book(models.Model):
     author_name = models.CharField(max_length=255)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='owned_books')
     readers = models.ManyToManyField(User, through='store.UserBookRelation', related_name='rated_books')
+    discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     def __str__(self):
         return f'{self.name}'
