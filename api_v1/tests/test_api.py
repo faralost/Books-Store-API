@@ -2,6 +2,7 @@ import json
 
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
@@ -90,6 +91,11 @@ class BookApiTestCase(APITestCase):
         serializer_data = BookSerializer(book).data
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(serializer_data, response.data)
+
+    def test_get_book_that_doesnt_exists(self):
+        self.url_detail = reverse('api_v1:book-detail', args=(34,))
+        response = self.client.get(self.url_detail)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_create_book(self):
         self.assertEqual(3, Book.objects.all().count())

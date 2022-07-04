@@ -13,12 +13,12 @@ class BookSerializer(serializers.ModelSerializer):
     likes_count = serializers.IntegerField(read_only=True)
     rating = serializers.DecimalField(read_only=True, max_digits=3, decimal_places=2)
     discounted_price = serializers.DecimalField(read_only=True, max_digits=7, decimal_places=2)
-    owner = serializers.CharField(source='owner.username', default='', read_only=True)
+    owner_name = serializers.CharField(read_only=True)
     readers = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = Book
-        fields = ('id', 'name', 'price', 'author_name', 'likes_count', 'rating', 'discounted_price', 'owner', 'readers')
+        fields = ('id', 'name', 'price', 'author_name', 'likes_count', 'rating', 'discounted_price', 'owner_name', 'readers')
 
 
 class UserBookRelationSerializer(serializers.ModelSerializer):

@@ -1,4 +1,4 @@
-from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField
+from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField, Prefetch, Subquery, OuterRef
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
@@ -9,15 +9,18 @@ from rest_framework.viewsets import GenericViewSet
 
 from api_v1.permissions import IsOwnerOrStaffOrReadOnly
 from api_v1.serializers import BookSerializer, UserBookRelationSerializer
-from store.models import Book, UserBookRelation
+from store.models import Book, UserBookRelation, User
 
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.annotate(
-            likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
-            rating=Avg('userbookrelation__rate'),
-            discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField())
-        ).select_related('owner').prefetch_related('readers').order_by('pk')
+        likes_count=Count(Case(When(userbookrelation__is_liked=True, then=1))),
+        rating=Avg('userbookrelation__rate'),
+        discounted_price=ExpressionWrapper(F('price') - F('discount'), output_field=DecimalField()),
+        owner_name=Subquery(User.objects.filter(id=OuterRef('owner_id')).values('username'))
+    ).prefetch_related(
+        Prefetch('readers', queryset=User.objects.all().distinct().only('id', 'first_name', 'last_name'))
+    ).order_by('pk')
     serializer_class = BookSerializer
     permission_classes = [IsOwnerOrStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
