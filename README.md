@@ -51,6 +51,10 @@ POSTGRES_PORT=db_port
 
 POSTGRES_HOST=db_host
 
+SOCIAL_AUTH_GITHUB_KEY=your_social_auth_github_key
+
+SOCIAL_AUTH_GITHUB_SECRET=your_social_auth_github_secret
+
 
 To start the server run:
 ```bash
