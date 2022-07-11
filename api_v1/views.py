@@ -1,4 +1,4 @@
-from django.db.models import Count, Case, When, Avg, ExpressionWrapper, F, DecimalField, Prefetch, Subquery, OuterRef
+from django.db.models import Count, Case, When, ExpressionWrapper, F, DecimalField, Prefetch, Subquery, OuterRef
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
