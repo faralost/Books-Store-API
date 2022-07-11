@@ -1,0 +1,106 @@
+[
+{
+  "model": "store.book",
+  "pk": 1,
+  "fields": {
+    "name": "The Secret",
+    "price": "1000.00",
+    "author_name": "Unknown Author",
+    "owner": 3,
+    "discount": "100.00",
+    "rating": "4.00"
+  }
+},
+{
+  "model": "store.book",
+  "pk": 2,
+  "fields": {
+    "name": "Lord Of The Rings",
+    "price": "90000.00",
+    "author_name": "J. R. R. Tolkien",
+    "owner": 2,
+    "discount": "0.00",
+    "rating": "2.00"
+  }
+},
+{
+  "model": "store.book",
+  "pk": 3,
+  "fields": {
+    "name": "New Era",
+    "price": "1000.00",
+    "author_name": "J. R. Growing",
+    "owner": 1,
+    "discount": "0.00",
+    "rating": null
+  }
+},
+{
+  "model": "store.book",
+  "pk": 4,
+  "fields": {
+    "name": "Tolkien: Life in Middle Earth",
+    "price": "500.00",
+    "author_name": "John Doe",
+    "owner": 2,
+    "discount": "0.00",
+    "rating": null
+  }
+},
+{
+  "model": "store.book",
+  "pk": 5,
+  "fields": {
+    "name": "New Book of Pyhon 3",
+    "price": "666.00",
+    "author_name": "Irina Lesnikova",
+    "owner": 1,
+    "discount": "0.00",
+    "rating": null
+  }
+},
+{
+  "model": "store.userbookrelation",
+  "pk": 1,
+  "fields": {
+    "user": 2,
+    "book": 2,
+    "is_liked": true,
+    "is_bookmarked": false,
+    "rate": 2
+  }
+},
+{
+  "model": "store.userbookrelation",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "book": 1,
+    "is_liked": true,
+    "is_bookmarked": false,
+    "rate": 4
+  }
+},
+{
+  "model": "store.userbookrelation",
+  "pk": 3,
+  "fields": {
+    "user": 1,
+    "book": 2,
+    "is_liked": true,
+    "is_bookmarked": false,
+    "rate": 3
+  }
+},
+{
+  "model": "store.userbookrelation",
+  "pk": 4,
+  "fields": {
+    "user": 1,
+    "book": 2,
+    "is_liked": false,
+    "is_bookmarked": false,
+    "rate": 1
+  }
+}
+]
